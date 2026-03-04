@@ -248,3 +248,6 @@ button:focus-visible {
     border-color: var(--border);
   }
 }
+button {
+  cursor: pointer;
+}
