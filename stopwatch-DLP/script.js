@@ -48,7 +48,7 @@ function formatTime(ms) {
   const s = Math.floor((safe % 60000) / 1000);
 
   const millis = safe % 1000;
-  const cs = Math.floor(millis / 10);
+  const cs = Math.floor((safe % 1000) / 10);
 
   if (h > 0) {
     // In HH:MM:SS we don't show centiseconds; keep sub as ms
