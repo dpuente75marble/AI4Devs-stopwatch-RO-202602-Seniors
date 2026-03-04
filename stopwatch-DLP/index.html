@@ -1,13 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Timer and Countdown</title>
-<link rel="stylesheet" href="styles.css">
-</head>
-<body>
-<h1>Timer and Countdown</h1>
-<script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stopwatch</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <main class="app" aria-label="Stopwatch and Countdown">
+      <header class="tabs" role="tablist" aria-label="Mode selector">
+        <button
+          class="tab is-active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-mode="stopwatch"
+        >
+          Stopwatch
+        </button>
+        <button
+          class="tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-mode="countdown"
+        >
+          Countdown
+        </button>
+      </header>
+
+      <section class="panel">
+        <div class="display" aria-live="polite">
+          <div class="time" id="timeDisplay">00:00:00</div>
+          <div class="sub" id="subDisplay">000</div>
+        </div>
+
+        <div class="countdown-inputs" id="countdownInputs" hidden>
+          <label class="field">
+            <span class="label">Min</span>
+            <input id="cdMin" inputmode="numeric" maxlength="2" value="05" />
+          </label>
+          <span class="sep">:</span>
+          <label class="field">
+            <span class="label">Sec</span>
+            <input id="cdSec" inputmode="numeric" maxlength="2" value="00" />
+          </label>
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-start" id="primaryBtn" type="button">
+            Start
+          </button>
+          <button class="btn btn-clear" id="secondaryBtn" type="button">
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <footer class="hint">
+        <span>Space: Start/Pause · R: Clear</span>
+      </footer>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
 </html>
