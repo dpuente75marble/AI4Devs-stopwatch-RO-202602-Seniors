@@ -280,6 +280,13 @@ tabs.forEach((btn) => {
 primaryBtn.addEventListener("click", toggleStartPause);
 secondaryBtn.addEventListener("click", clearAll);
 
+// Select countdown input content when focused
+[cdMin, cdSec].forEach((inp) => {
+  inp.addEventListener("focus", () => {
+    inp.select();
+  });
+});
+
 // Keyboard shortcuts: Space = Start/Pause/Resume, R = Clear
 window.addEventListener("keydown", (e) => {
   const key = e.key.toLowerCase();
