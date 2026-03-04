@@ -298,11 +298,19 @@ window.addEventListener("keydown", (e) => {
 
 // Keep countdown configured value in sync (basic)
 [cdMin, cdSec].forEach((inp) => {
+  // Allow only numbers
+  inp.addEventListener("input", () => {
+    inp.value = inp.value.replace(/[^0-9]/g, "");
+  });
+
+  // Normalize values when leaving input
   inp.addEventListener("blur", () => {
     if (state.mode !== "countdown") return;
     if (state.running) return;
+
     state.cdConfiguredMs = readCountdownInputsMs();
     state.cdRemainingMs = state.cdConfiguredMs;
+
     render();
   });
 });
