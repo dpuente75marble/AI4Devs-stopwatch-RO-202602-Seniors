@@ -8,6 +8,8 @@ const secondaryBtn = $("#secondaryBtn");
 
 const tabs = document.querySelectorAll(".tab");
 const countdownInputs = $("#countdownInputs");
+const displayEl = document.querySelector(".display");
+
 const cdMin = $("#cdMin");
 const cdSec = $("#cdSec");
 
@@ -20,7 +22,7 @@ const state = {
   swStartTs: 0, // performance.now() when started/resumed
   swElapsedMs: 0, // accumulated elapsed ms when paused
 
-  // Countdown (we wire basic UI now, full logic next step)
+  // Countdown
   cdConfiguredMs: 0,
   cdStartTs: 0,
   cdRemainingMs: 0,
@@ -58,7 +60,6 @@ function formatTime(ms) {
 
 function setPrimaryLabel() {
   if (!state.running) {
-    // When not running, we can be either "Start" (fresh) or "Resume" (paused)
     const isFresh =
       state.mode === "stopwatch"
         ? state.swElapsedMs === 0
@@ -72,7 +73,6 @@ function setPrimaryLabel() {
 }
 
 function readCountdownInputsMs() {
-  // Simple, safe parse. Full validation next step.
   const min = parseInt(cdMin.value, 10);
   const sec = parseInt(cdSec.value, 10);
 
@@ -83,6 +83,15 @@ function readCountdownInputsMs() {
   cdSec.value = pad2(s);
 
   return (m * 60 + s) * 1000;
+}
+
+function flashDisplay() {
+  if (!displayEl) return;
+  displayEl.classList.remove("is-flashing");
+  // Force reflow to restart animation
+  void displayEl.offsetWidth;
+  displayEl.classList.add("is-flashing");
+  setTimeout(() => displayEl.classList.remove("is-flashing"), 1200);
 }
 
 // ===== Rendering =====
@@ -116,12 +125,8 @@ function render() {
   if (state.mode === "stopwatch") {
     renderStopwatch(state.swElapsedMs);
   } else {
-    // For now: show configured/remaining placeholder
-    const shown =
-      state.running || state.cdRemainingMs > 0
-        ? state.cdRemainingMs
-        : state.cdConfiguredMs || readCountdownInputsMs();
-
+    const configured = state.cdConfiguredMs || readCountdownInputsMs();
+    const shown = state.cdRemainingMs > 0 ? state.cdRemainingMs : configured;
     renderCountdown(shown);
   }
 }
@@ -145,10 +150,20 @@ function loop() {
     const current = state.swElapsedMs + (now - state.swStartTs);
     renderStopwatch(current);
   } else {
-    // Countdown logic will be completed next step (we update display if running)
     const elapsed = now - state.cdStartTs;
     const remaining = Math.max(0, state.cdRemainingMs - elapsed);
+
     renderCountdown(remaining);
+
+    if (remaining === 0) {
+      // Stop + flash at end
+      state.running = false;
+      state.cdRemainingMs = 0;
+      stopLoop();
+      flashDisplay();
+      render();
+      return;
+    }
   }
 
   rafId = requestAnimationFrame(loop);
@@ -198,14 +213,26 @@ function toggleStartPause() {
     return;
   }
 
-  // Countdown (placeholder; full behavior next step)
+  // Countdown
   if (!state.running) {
-    state.cdConfiguredMs = readCountdownInputsMs();
-    state.cdRemainingMs = state.cdConfiguredMs;
+    // Decide whether this is Start (fresh) or Resume (paused)
+    const configuredNow = readCountdownInputsMs();
+
+    const isFresh =
+      state.cdRemainingMs === 0 ||
+      state.cdRemainingMs === state.cdConfiguredMs ||
+      state.cdConfiguredMs === 0;
+
+    if (isFresh) {
+      state.cdConfiguredMs = configuredNow;
+      state.cdRemainingMs = configuredNow;
+    }
+
     if (state.cdRemainingMs <= 0) {
       render();
       return;
     }
+
     state.running = true;
     state.cdStartTs = performance.now();
     setPrimaryLabel();
@@ -214,7 +241,7 @@ function toggleStartPause() {
     return;
   }
 
-  // Pause countdown
+  // Pause countdown: store remaining precisely
   const now = performance.now();
   const elapsed = now - state.cdStartTs;
   state.cdRemainingMs = Math.max(0, state.cdRemainingMs - elapsed);
