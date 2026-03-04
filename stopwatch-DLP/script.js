@@ -118,6 +118,11 @@ function render() {
   // Countdown inputs visibility
   countdownInputs.hidden = state.mode !== "countdown";
 
+  // Disable countdown inputs while running
+  [cdMin, cdSec].forEach((inp) => {
+    inp.disabled = state.mode === "countdown" && state.running;
+  });
+
   // Buttons labels
   setPrimaryLabel();
 
